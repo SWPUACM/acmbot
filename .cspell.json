@@ -3,6 +3,7 @@
     "words": [
         "acmbot",
         "nonebot",
+        "pydantic",
         "swpuacm"
     ]
 }
