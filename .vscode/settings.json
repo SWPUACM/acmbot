@@ -1,0 +1,7 @@
+{
+  "[python]": {
+    "editor.defaultFoldingRangeProvider": "ms-python.black-formatter"
+  },
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true
+}
