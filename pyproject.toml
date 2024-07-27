@@ -7,7 +7,10 @@ requires-python = ">=3.10"
 authors = [
     {name = "苏向夜", email = "fu050409@163.com"},
 ]
-dependencies = []
+dependencies = [
+    "nonebot2>=2.3.2",
+    "nonebot-adapter-onebot>=2.4.4",
+]
 license = {text = "AGPLv3"}
 
 [tool.nonebot]
