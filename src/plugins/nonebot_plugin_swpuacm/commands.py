@@ -51,5 +51,25 @@ async def handle_bot(matcher: Matcher):
 async def handle_q_a(event: Event, matcher: Matcher):
     logger.debug(f"收到群聊问答：{event.get_message()}")
     return await matcher.finish(
-        MessageSegment.at(event.get_user_id()) + " 请等待此功能开发中..."
+        MessageSegment.at(event.get_user_id()) 
+        + " 此功能正在由"
+        + MessageSegment.at('2030549481')
+        + MessageSegment.at('1728395677')
+        + "施工中，请绕行"
     )
+
+# @q_a_command.handle()
+# async def handle_q_a(event: Event, matcher: Matcher):
+#     q_no = str(event.get_message())
+#     q_no = q_no[4:]
+#     QAList = {"1":12, "2":23}
+#     if not q_no:
+#         mes = MessageSegment.at(event.get_user_id()) + " 以下是QAList：\n"
+#         for no in QAList.keys():
+#             mes += f"{no}. {QAList[no]}\n"
+#         mes += "请以“.qa (对应的序号)”格式发送消息。\n"
+#         mes += "另外，如果QAList中不包含你想问的问题，请直接发送“.qa (你想问的问题)”，我会为您转接人工客服（bushi）"
+#         return await matcher.finish(mes)
+#     return await matcher.finish(
+#         MessageSegment.at(event.get_user_id()) + f"\nA：{QAList[q_no]}"
+#     )
