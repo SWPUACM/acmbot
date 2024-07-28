@@ -29,14 +29,38 @@ async def handle_request(event: GroupIncreaseNoticeEvent, matcher: Matcher):
 
 @help_command.handle()
 async def handle_help(event: Event, matcher: Matcher):
-    return await matcher.finish(
-        MessageSegment.at(event.get_user_id())
-        + " 你好，我是天在水，欢迎查看使用帮助。\n"
-        + "[.help] - 查看此帮助信息\n"
-        + "[.bot] - 查看机器人信息\n"
-        + "[.qa] - ACM团队相关问答\n"
-        + "此节点未挂载智能体，如有疑问请联系管理员。"
-    )
+    command = event.get_plaintext()[5:].strip()
+    if not command:
+        return await matcher.finish(
+            MessageSegment.at(event.get_user_id())
+            + " 你好，我是天在水，欢迎查看使用帮助。\n"
+            + "[.help] - 查看此帮助信息\n"
+            + "[.bot] - 查看机器人信息\n"
+            + "[.qa] - ACM团队相关问答\n"
+            + "使用[.help [命令]]获取指定命令的帮助信息。\n"
+            + "此节点未挂载智能体，如有疑问请联系管理员。"
+        )
+    else:
+        match command:
+            case "bot":
+                return await matcher.finish("bot - 展示机器人信息")
+            case "qa":
+                return await matcher.finish(
+                    "qa [ID|QUESTION] - ACM团队相关问答\n"
+                    + "- qa 展示Q&A列表\n"
+                    + "- qa [ID] 展示 ID 对应的解答\n"
+                    + "- qa [问题] 发起新的提问，提问将会被递交至ACM团队，"
+                    + "新生队长"
+                    + MessageSegment.at("2030549481")
+                    + " "
+                    + MessageSegment.at("1728395677")
+                    + "将会为你们的问题作出解答，你也可以直接联系我们。"
+                )
+            case _:
+                return await matcher.finish(
+                    MessageSegment.at(event.get_user_id())
+                    + " 未知命令，请使用[.help]查看帮助信息。"
+                )
 
 
 @bot_command.handle()
@@ -51,12 +75,13 @@ async def handle_bot(matcher: Matcher):
 async def handle_q_a(event: Event, matcher: Matcher):
     logger.debug(f"收到群聊问答：{event.get_message()}")
     return await matcher.finish(
-        MessageSegment.at(event.get_user_id()) 
-        + " 此功能正在由"
-        + MessageSegment.at('2030549481')
-        + MessageSegment.at('1728395677')
-        + "施工中，请绕行"
+        MessageSegment.at(event.get_user_id())
+        + " 请等待新生队长"
+        + MessageSegment.at("2030549481")
+        + MessageSegment.at("1728395677")
+        + "完善Q&A列表。"
     )
+
 
 # @q_a_command.handle()
 # async def handle_q_a(event: Event, matcher: Matcher):
@@ -67,8 +92,6 @@ async def handle_q_a(event: Event, matcher: Matcher):
 #         mes = MessageSegment.at(event.get_user_id()) + " 以下是QAList：\n"
 #         for no in QAList.keys():
 #             mes += f"{no}. {QAList[no]}\n"
-#         mes += "请以“.qa (对应的序号)”格式发送消息。\n"
-#         mes += "另外，如果QAList中不包含你想问的问题，请直接发送“.qa (你想问的问题)”，我会为您转接人工客服（bushi）"
 #         return await matcher.finish(mes)
 #     return await matcher.finish(
 #         MessageSegment.at(event.get_user_id()) + f"\nA：{QAList[q_no]}"
