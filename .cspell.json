@@ -3,7 +3,9 @@
     "words": [
         "acmbot",
         "nonebot",
+        "onebot",
         "pydantic",
+        "SWPU",
         "swpuacm"
     ]
 }
