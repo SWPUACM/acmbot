@@ -1,4 +1,4 @@
-from nonebot import on_command, on_notice, on_request
+from nonebot import on_command, on_notice
 from nonebot.matcher import Matcher
 from nonebot.adapters import Event
 from nonebot.adapters.onebot.v11 import MessageSegment
