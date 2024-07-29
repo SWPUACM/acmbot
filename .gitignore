@@ -145,3 +145,7 @@ node_modules/
 
 # pdm
 .pdm-python
+
+# toml
+*.toml
+!pyproject.toml
