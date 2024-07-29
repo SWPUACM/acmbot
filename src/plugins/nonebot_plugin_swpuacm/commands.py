@@ -90,6 +90,8 @@ async def handle_q_a(event: Event, matcher: Matcher, bot: Bot):
         msg = MessageSegment.at(event.get_user_id()) + " 以下是Q&A列表："
         for no in QAListK:
             msg += f"\n{no}. {QAList[no]['Q']}" # type: ignore
+        if not QAList:
+            msg += "\n空。"
         return await matcher.finish(msg)
 
     elif coms[1] in QAListK:
