@@ -145,3 +145,7 @@ node_modules/
 
 # pdm
 .pdm-python
+
+# others
+src/plugins/nonebot_plugin_swpuacm/res/settings.toml
+src/plugins/nonebot_plugin_swpuacm/res/QAList.toml
