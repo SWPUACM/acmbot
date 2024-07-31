@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:11c01770559dedfc586e23f48d9b86debd7094c35a2cdbbd4aa55f8dbb742377"
+content_hash = "sha256:f594405b9cae33e158a6167bbf33ee036bebc87be2eb335e51d2cb02d7091e6a"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -823,6 +823,17 @@ marker = "python_version < \"3.11\""
 files = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+]
+
+[[package]]
+name = "tomlkit"
+version = "0.13.0"
+requires_python = ">=3.8"
+summary = "Style preserving TOML library"
+groups = ["default"]
+files = [
+    {file = "tomlkit-0.13.0-py3-none-any.whl", hash = "sha256:7075d3042d03b80f603482d69bf0c8f345c2b30e41699fd8883227f89972b264"},
+    {file = "tomlkit-0.13.0.tar.gz", hash = "sha256:08ad192699734149f5b97b45f1f18dad7eb1b6d16bc72ad0c2335772650d7b72"},
 ]
 
 [[package]]

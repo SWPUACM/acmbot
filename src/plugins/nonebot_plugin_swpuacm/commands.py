@@ -1,12 +1,14 @@
 from nonebot import on_command, on_notice
 from nonebot.matcher import Matcher
 from nonebot.adapters import Event
+from nonebot.adapters import Bot
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot.adapters.onebot.v11.event import GroupIncreaseNoticeEvent
 from nonebot.log import logger
 
 from .constant import __version__, PY_VERSION
 
+import tomlkit as toml
 import nonebot
 
 add_request = on_notice(priority=2, block=True)
@@ -49,7 +51,7 @@ async def handle_help(event: Event, matcher: Matcher):
                     "qa [ID|QUESTION] - ACM团队相关问答\n"
                     + "- qa 展示Q&A列表\n"
                     + "- qa [ID] 展示 ID 对应的解答\n"
-                    + "- qa [问题] 发起新的提问，提问将会被递交至ACM团队，"
+                    + "- qa ask [问题] 发起新的提问，提问将会被递交至ACM团队，"
                     + "新生队长"
                     + MessageSegment.at("2030549481")
                     + " "
@@ -72,27 +74,123 @@ async def handle_bot(matcher: Matcher):
 
 
 @q_a_command.handle()
-async def handle_q_a(event: Event, matcher: Matcher):
-    logger.debug(f"收到群聊问答：{event.get_message()}")
-    return await matcher.finish(
-        MessageSegment.at(event.get_user_id())
-        + " 请等待新生队长"
-        + MessageSegment.at("2030549481")
-        + MessageSegment.at("1728395677")
-        + "完善Q&A列表。"
-    )
+async def handle_q_a(event: Event, matcher: Matcher, bot: Bot):
+    coms = str(event.get_message()).split()
+    
+    with open("src/plugins/nonebot_plugin_swpuacm/res/QAList.toml", 'r') as QAListF:
+        QAList = toml.load(QAListF)
+        QAListK = QAList.keys()
+    with open("src/plugins/nonebot_plugin_swpuacm/res/settings.toml", 'r') as setting:
+        settings = toml.load(setting)
+        old_group = settings["old_group"]
+        new_group = settings["new_group"]
+        admins = settings["administrators"]
+        
+    if len(coms) == 1:
+        msg = MessageSegment.at(event.get_user_id()) + " 以下是Q&A列表："
+        for no in QAListK:
+            msg += f"\n{no}. {QAList[no]['Q']}" # type: ignore
+        if not QAList:
+            msg += "\n空。"
+        return await matcher.finish(msg)
 
+    elif coms[1] in QAListK:
+        if QAList[coms[1]]['A'] == "None": # type: ignore
+            return await matcher.finish(
+                MessageSegment.at(event.get_user_id())
+                + " 对不起，这个问题还没有被解答，请耐心等待"
+            )
+        return await matcher.finish(
+            MessageSegment.at(event.get_user_id())
+            + f"\nQ: {QAList[coms[1]]['Q']}" # type: ignore
+            + f"\nA: {QAList[coms[1]]['A']}" # type: ignore
+        )
 
-# @q_a_command.handle()
-# async def handle_q_a(event: Event, matcher: Matcher):
-#     q_no = str(event.get_message())
-#     q_no = q_no[4:]
-#     QAList = {"1":12, "2":23}
-#     if not q_no:
-#         mes = MessageSegment.at(event.get_user_id()) + " 以下是QAList：\n"
-#         for no in QAList.keys():
-#             mes += f"{no}. {QAList[no]}\n"
-#         return await matcher.finish(mes)
-#     return await matcher.finish(
-#         MessageSegment.at(event.get_user_id()) + f"\nA：{QAList[q_no]}"
-#     )
+    elif coms[1] == "ask":
+        try:
+            ques = coms[2]
+        except IndexError:
+            return await matcher.finish(
+                MessageSegment.at(event.get_user_id())
+                + " 请在 .qa ask 指令后加上你想问的问题"
+            )
+        else:
+            new_no = str(len(QAListK) + 1)
+            QAList.add(new_no, {}) # type: ignore
+            QAList[new_no].add('Q', ques) # type: ignore
+            QAList[new_no].add('A', "None") # type: ignore
+            with open("src/plugins/nonebot_plugin_swpuacm/res/QAList.toml", 'wt') as QAListF:
+                toml.dump(QAList, QAListF)
+            
+            msg = "新的问题已经出现：\n" + ques + f"\n序号为{new_no}。请使用命令\n“.qa answer {new_no} [问题的答案]”\n对问题进行回答。"
+            await bot.send_group_msg(group_id = old_group, message = msg)
+            return await Matcher.finish(
+                MessageSegment.at(event.get_user_id())
+                + f" 问题已经追加到Q&A列表，序号为{new_no}。请耐心等待队长"
+                + MessageSegment.at("2030549481")
+                + " "
+                + MessageSegment.at("1728395677")
+                + " 解答。"
+            )
+            
+    elif coms[1] == "answer":
+        if int(event.get_user_id()) not in admins: # type: ignore
+            return await matcher.finish(
+                MessageSegment.at(event.get_user_id())
+                + " 您的权限不足，无法将该回答添加到Q&A列表"
+            )
+        elif len(coms) == 2:
+            return await matcher.finish(
+                MessageSegment.at(event.get_user_id())
+                + " 未给出问题的编号和答案。请重试。"
+            )
+        elif len(coms) == 3:
+            try:
+                ans_no = int(coms[2])
+            except ValueError:
+                return await matcher.finish(
+                    MessageSegment.at(event.get_user_id())
+                    + " 未指明问题的编号。请重试。"
+                )
+            else:
+                if coms[2] not in QAListK:
+                    return await matcher.finish(
+                        MessageSegment.at(event.get_user_id())
+                        + " 该编号不存在。请重试。"
+                    )
+                return await matcher.finish(
+                    MessageSegment.at(event.get_user_id())
+                    + " 未给出问题的答案。请重试。"
+                )
+        else:
+            ans_no = coms[2]
+            answer = coms[3]
+            try:
+                int(ans_no)
+            except ValueError:
+                return await matcher.finish(
+                    MessageSegment.at(event.get_user_id())
+                    + " 你似乎把编号和问题放反了。请重试。"
+                )
+            else:
+                if coms[2] not in QAListK:
+                    return await matcher.finish(
+                        MessageSegment.at(event.get_user_id())
+                        + " 该编号不存在。请重试。"
+                    )
+                else:  
+                    QAList[ans_no]['A'] = answer # type: ignore
+                    with open("src/plugins/nonebot_plugin_swpuacm/res/QAList.toml", 'wt') as QAListF:
+                        toml.dump(QAList, QAListF)
+                    msg = f"{ans_no}号问题已经被解答。请使用“.qa {ans_no}”获取回答。"
+                    await bot.send_group_msg(group_id = new_group, message = msg)
+                    return await matcher.finish(
+                        MessageSegment.at(event.get_user_id())
+                        + f" {ans_no}号问题的答案已收录进Q&A列表。"
+                    )
+                    
+    else:
+        return await matcher.finish(
+            MessageSegment.at(event.get_user_id())
+            + " 未知命令，请使用[.help]查看帮助信息。"
+        )
