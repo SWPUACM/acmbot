@@ -133,11 +133,11 @@ async def handle_q_a(event: Event, matcher: Matcher, bot: Bot):
                 + " 解答。"
             )
             
-    elif coms[1] == "answer":
+    elif coms[1] == "answer" or coms[1] == "ans":
         if int(event.get_user_id()) not in admins: # type: ignore
             return await matcher.finish(
                 MessageSegment.at(event.get_user_id())
-                + " 您的权限不足，无法将该回答添加到Q&A列表"
+                + " 您的权限不足，无法进行该操作。"
             )
         elif len(coms) == 2:
             return await matcher.finish(
@@ -188,6 +188,51 @@ async def handle_q_a(event: Event, matcher: Matcher, bot: Bot):
                         MessageSegment.at(event.get_user_id())
                         + f" {ans_no}号问题的答案已收录进Q&A列表。"
                     )
+    
+    elif coms[1] == "delete" or coms[1] == "del":
+        if int(event.get_user_id()) not in admins: # type: ignore
+            return await matcher.finish(
+                MessageSegment.at(event.get_user_id())
+                + " 您的权限不足，无法进行该操作。"
+            )
+        else:
+            del_no = coms[2]
+            if del_no not in QAListK:
+                return await matcher.finish(
+                    MessageSegment.at(event.get_user_id())
+                    + " 请正确填写序号。"
+                )
+            else:
+                if len(coms) == 3:
+                    return await matcher.finish(
+                        MessageSegment.at(event.get_user_id())
+                        + " 请给出对该问题的具体操作。"
+                    )
+                if coms[3] == "answer" or coms[3] == "ans":
+                    if QAList[del_no]["A"] == "None":  # type: ignore
+                        return await matcher.finish(
+                            MessageSegment.at(event.get_user_id())
+                            + " 该问题尚没有解答，不需要删除答案。"
+                        )
+                    else:
+                        QAList[del_no]["A"] = "None"  # type: ignore
+                        with open("src/plugins/nonebot_plugin_swpuacm/res/QAList.toml", 'wt') as QAListF:
+                            toml.dump(QAList, QAListF)
+                        return await matcher.finish(
+                            MessageSegment.at(event.get_user_id())
+                            + f" {del_no}号问题的答案已删除。请你下次谨慎填写答案。"
+                        )
+                elif coms[3] == "question" or coms[3] == "ques":
+                    del QAList[del_no]
+                    for no in range(int(del_no), len(QAListK) + 1):
+                        QAList[str(no)] = QAList[str(no + 1)]
+                    del QAList[str(len(QAListK))]
+                    with open("src/plugins/nonebot_plugin_swpuacm/res/QAList.toml", 'wt') as QAListF:
+                        toml.dump(QAList, QAListF)
+                    return await matcher.finish(
+                        MessageSegment.at(event.get_user_id())
+                        + f" {del_no}号问题已删除。"
+                       )
                     
     else:
         return await matcher.finish(
