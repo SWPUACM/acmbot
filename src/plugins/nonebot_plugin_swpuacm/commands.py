@@ -226,7 +226,8 @@ async def handle_q_a(event: Event, matcher: Matcher, bot: Bot):
                     del QAList[del_no]
                     for no in range(int(del_no), len(QAListK) + 1):
                         QAList[str(no)] = QAList[str(no + 1)]
-                    del QAList[str(len(QAListK))]
+                    if del_no != str(len(QAListK) + 1):
+                        del QAList[str(len(QAListK))]
                     with open("src/plugins/nonebot_plugin_swpuacm/res/QAList.toml", 'wt') as QAListF:
                         toml.dump(QAList, QAListF)
                     return await matcher.finish(
