@@ -75,7 +75,7 @@ async def handle_bot(matcher: Matcher):
 
 @q_a_command.handle()
 async def handle_q_a(event: Event, matcher: Matcher, bot: Bot):
-    coms = str(event.get_message()).split()
+    coms = list(filter(None, str(event.get_message()).split()))
     
     with open("src/plugins/nonebot_plugin_swpuacm/res/QAList.toml", 'r') as QAListF:
         QAList = toml.load(QAListF)
